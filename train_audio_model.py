@@ -19,7 +19,7 @@ def extract_features(file_path, sr=22050):
     if y.size == 0:
         raise ValueError("Empty audio signal")
 
-    min_len = 3 * sr
+    min_len = 5 * sr
     if len(y) < min_len:
         y = np.pad(y, (0, min_len - len(y)))
 
@@ -71,7 +71,7 @@ def load_dataset():
                     continue
                 file_path = os.path.join(genre_path, fname)
                 try:
-                    # print(f"Processing {file_path} ...")
+                    print(f"Processing  song: {file_path}")
                     features = extract_features(file_path)
                     X.append(features)
                     y.append(genre)
@@ -85,7 +85,6 @@ def load_dataset():
 
 def main():
     X, y = load_dataset()
-    print("Total samples:", len(y))
 
     label_encoder = LabelEncoder()
     y_encoded = label_encoder.fit_transform(y)
@@ -115,7 +114,6 @@ def main():
     joblib.dump(clf, "audio_genre_classifier.pkl")
     joblib.dump(scaler, "audio_scaler.pkl")
     joblib.dump(label_encoder, "audio_label_encoder.pkl")
-    print("Saved audio_genre_classifier.pkl, audio_scaler.pkl, audio_label_encoder.pkl")
 
 
 if __name__ == "__main__":

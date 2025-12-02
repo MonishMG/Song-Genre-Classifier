@@ -3,10 +3,10 @@ import sounddevice as sd
 import librosa
 import joblib
 
-DURATION = 5      # seconds to listen each time
-SR = 22050        # sampling rate for librosa / recording
+DURATION = 15      # seconds to listen each time
+SR = 22050        # sampling rate for librosa 
 
-# Load model artifacts
+# Load model data
 clf = joblib.load("audio_genre_classifier.pkl")
 scaler = joblib.load("audio_scaler.pkl")
 label_encoder = joblib.load("audio_label_encoder.pkl")
@@ -15,35 +15,29 @@ label_encoder = joblib.load("audio_label_encoder.pkl")
 # MFCCs (timbre), Chroma (harmonic structure), Spectral centroid (brightness), zero-crossing rate(sharpness), '
 # bandwidth (frequerncy), rolloff (energy), tempo (BPM).
 def extract_features_from_signal(y, sr=SR):
-    # Guard against empty audio
     if y.size == 0:
         raise ValueError("Empty audio signal")
 
-    # Ensure at least 3 seconds (pad if shorter)
-    min_len = 3 * sr
+    min_len = 15 * sr
     if len(y) < min_len:
         y = np.pad(y, (0, min_len - len(y)))
 
-    # --- MFCCs (20) ---
-    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)        # (20, T)
-    mfcc_mean = mfcc.mean(axis=1)                             # (20,)
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)        
+    mfcc_mean = mfcc.mean(axis=1)                             
 
-    # --- Spectral features (scalars) ---
-    spec_centroid = librosa.feature.spectral_centroid(y=y, sr=sr)      # (1, T)
-    spec_bw       = librosa.feature.spectral_bandwidth(y=y, sr=sr)     # (1, T)
-    zcr           = librosa.feature.zero_crossing_rate(y)              # (1, T)
-    rolloff       = librosa.feature.spectral_rolloff(y=y, sr=sr)       # (1, T)
+    spec_centroid = librosa.feature.spectral_centroid(y=y, sr=sr)      
+    spec_bw       = librosa.feature.spectral_bandwidth(y=y, sr=sr)     
+    zcr           = librosa.feature.zero_crossing_rate(y)              
+    rolloff       = librosa.feature.spectral_rolloff(y=y, sr=sr)       
 
     spec_centroid_mean = float(spec_centroid.mean())
     spec_bw_mean       = float(spec_bw.mean())
     zcr_mean           = float(zcr.mean())
     rolloff_mean       = float(rolloff.mean())
 
-    # --- Chroma (12) ---
-    chroma = librosa.feature.chroma_stft(y=y, sr=sr)          # (12, T)
-    chroma_mean = chroma.mean(axis=1)                         # (12,)
+    chroma = librosa.feature.chroma_stft(y=y, sr=sr)          
+    chroma_mean = chroma.mean(axis=1)                         
 
-    # --- Tempo (BPM) ---
     tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
     tempo_val = float(tempo)
 
@@ -74,13 +68,12 @@ def record_and_classify():
     pred = clf.predict(X_scaled)[0]
     genre = label_encoder.inverse_transform([pred])[0]
 
-    print(f"🎵 Predicted genre: {genre}")
+    print(f"Predicted genre: {genre}")
 
 
 
 def main():
     print("Real-time audio genre classifier")
-    print("Press Ctrl+C to stop.\n")
     try:
         while True:
             record_and_classify()
