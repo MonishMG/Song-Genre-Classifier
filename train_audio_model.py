@@ -26,27 +26,27 @@ def extract_features(file_path, sr=22050):
     mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)        
     mfcc_mean = mfcc.mean(axis=1)             
 
-    spec_centroid = librosa.feature.spectral_centroid(y=y, sr=sr)      
+    spec_centroid = librosa.feature.spectral_centroid(y=y, sr=sr)      # where the “center of mass” of frequencies is (brightness)
     spec_bw       = librosa.feature.spectral_bandwidth(y=y, sr=sr)     # spread of the spectrum
-    zcr           = librosa.feature.zero_crossing_rate(y)              # how oftn teh signal crosses zero
+    zcr           = librosa.feature.zero_crossing_rate(y)              # how often teh signal crosses zero
     rolloff       = librosa.feature.spectral_rolloff(y=y, sr=sr)       # ffrequency below which a certain percentage of total energy is
     spec_centroid_mean = float(spec_centroid.mean())
     spec_bw_mean       = float(spec_bw.mean())
     zcr_mean           = float(zcr.mean())
     rolloff_mean       = float(rolloff.mean())
 
-    chroma = librosa.feature.chroma_stft(y=y, sr=sr)          
+    chroma = librosa.feature.chroma_stft(y=y, sr=sr)                   # harmonic/pitch classes
     chroma_mean = chroma.mean(axis=1)                        
 
-    tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
+    tempo, _ = librosa.beat.beat_track(y=y, sr=sr)                     # rythm (BPM)
     tempo_val = float(tempo)
 
-    spectral_vec = np.array(
+    spectral_vec = np.array(                                           # makes a vector of the spectral features + tempo
         [spec_centroid_mean, spec_bw_mean, zcr_mean, rolloff_mean, tempo_val],
         dtype=np.float32
     )
 
-    feature_vector = np.concatenate(
+    feature_vector = np.concatenate(                                   #  final feature vector
         [mfcc_mean.astype(np.float32), spectral_vec, chroma_mean.astype(np.float32)],
         axis=0
     )
@@ -58,8 +58,8 @@ def extract_features(file_path, sr=22050):
 
 
 def load_dataset():
-    X = []
-    y = []
+    X = []              # feature vectors
+    y = []              # genre labels  
 
     genres = []
     for genre in os.listdir(DATA_DIR):
@@ -94,7 +94,7 @@ def main():
 
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X_scaled, y_encoded, test_size=0.2, random_state=42, stratify=y_encoded
+        X_scaled, y_encoded, test_size=0.3, random_state=42, stratify=y_encoded
     )
 
     clf = RandomForestClassifier(
