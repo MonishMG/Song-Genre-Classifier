@@ -29,7 +29,7 @@ def extract_features(file_path, sr=22050):
     spec_centroid = librosa.feature.spectral_centroid(y=y, sr=sr)      
     spec_bw       = librosa.feature.spectral_bandwidth(y=y, sr=sr)     # spread of the spectrum
     zcr           = librosa.feature.zero_crossing_rate(y)              # how oftn teh signal crosses zero
-    rolloff       = librosa.feature.spectral_rolloff(y=y, sr=sr)       # ffrequency below whic a certain percentage of total energy is
+    rolloff       = librosa.feature.spectral_rolloff(y=y, sr=sr)       # ffrequency below which a certain percentage of total energy is
     spec_centroid_mean = float(spec_centroid.mean())
     spec_bw_mean       = float(spec_bw.mean())
     zcr_mean           = float(zcr.mean())
@@ -98,7 +98,7 @@ def main():
     )
 
     clf = RandomForestClassifier(
-        n_estimators=400,
+        n_estimators=800,
         max_depth=None,
         random_state=42,
         n_jobs=-1
