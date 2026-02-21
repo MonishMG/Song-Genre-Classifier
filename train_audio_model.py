@@ -4,8 +4,9 @@ import librosa
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 import joblib
+import matplotlib.pyplot as plt
 
 DATA_DIR = "audio_data"
 
@@ -109,6 +110,19 @@ def main():
     y_pred = clf.predict(X_test)
     print("Accuracy:", accuracy_score(y_test, y_pred))
     print(classification_report(y_test, y_pred, target_names=label_encoder.classes_))
+    cm = confusion_matrix(y_test, y_pred)
+
+    disp = ConfusionMatrixDisplay(
+        confusion_matrix=cm,
+        display_labels=label_encoder.classes_
+    )
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    disp.plot(ax=ax, cmap="Blues", xticks_rotation=45, values_format="d")
+    plt.title("Confusion Matrix - Audio Genre Classifier")
+    plt.tight_layout()
+    plt.show()
+
 
 
     joblib.dump(clf, "audio_genre_classifier.pkl")
